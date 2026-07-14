@@ -6,7 +6,7 @@ on:
     - cron: "7,22,37,52 * * * *"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: whalesports-tracker
@@ -54,3 +54,12 @@ jobs:
           MIN_ALERT_TRADERS: "3"
           MIN_ALERT_WCI: "65"
         run: python signal_alerts.py
+              - name: Guardar datos actualizados
+        run: |
+          git config user.name "WhaleSports AI Bot"
+          git config user.email "actions@github.com"
+          git add top_50_sports_traders.csv
+          git add top_50_active_positions.csv
+          git add sports_consensus_v2.csv
+          git diff --cached --quiet || git commit -m "Actualizar datos deportivos"
+          git push
