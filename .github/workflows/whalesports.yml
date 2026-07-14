@@ -54,7 +54,8 @@ jobs:
           MIN_ALERT_TRADERS: "3"
           MIN_ALERT_WCI: "65"
         run: python signal_alerts.py
-              - name: Guardar datos actualizados
+
+      - name: Guardar datos actualizados
         run: |
           git config user.name "WhaleSports AI Bot"
           git config user.email "actions@github.com"
