@@ -1,0 +1,56 @@
+name: WhaleSports AI Tracker
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: whalesports-tracker
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Recuperar historial de alertas
+        uses: actions/cache@v4
+        with:
+          path: alert_state.json
+          key: whale-alert-state-${{ github.run_id }}
+          restore-keys: |
+            whale-alert-state-
+
+      - name: Descargar Top 50 Sports Leaderboard
+        run: python leaderboard.py
+
+      - name: Descargar posiciones activas
+        run: python positions.py
+
+      - name: Calcular consenso
+        run: python consensus_v2.py
+
+      - name: Enviar alertas relevantes
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MIN_ALERT_TRADERS: "3"
+          MIN_ALERT_WCI: "65"
+        run: python signal_alerts.py
