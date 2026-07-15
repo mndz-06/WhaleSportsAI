@@ -47,6 +47,12 @@ jobs:
       - name: Calcular consenso
         run: python consensus_v2.py
 
+      - name: Guardar snapshot historico
+        run: python snapshot_history.py
+
+      - name: Detectar entradas tempranas
+        run: python early_entry_detector.py
+
       - name: Enviar alertas relevantes
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -62,5 +68,7 @@ jobs:
           git add top_50_sports_traders.csv
           git add top_50_active_positions.csv
           git add sports_consensus_v2.csv
+          git add market_history.csv
+          git add early_entry_signals.csv
           git diff --cached --quiet || git commit -m "Actualizar datos deportivos"
           git push
