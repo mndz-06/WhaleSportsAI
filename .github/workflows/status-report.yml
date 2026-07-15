@@ -1,0 +1,42 @@
+name: WhaleSports Status Report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "10 */3 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Descargar Top 50 Sports Leaderboard
+        run: python leaderboard.py
+
+      - name: Descargar posiciones activas
+        run: python positions.py
+
+      - name: Calcular consenso
+        run: python consensus_v2.py
+
+      - name: Enviar reporte de estado
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python status_report.py
